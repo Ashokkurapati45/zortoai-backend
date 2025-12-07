@@ -7,11 +7,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('django-insecure-*fq5@3)ee=$6ncdx=zj=-=2pfg!#bghj+sl-*84*w#5rrn5#fc','dev-secret')
+SECRET_KEY = os.getenv('p8$la8*m_lg*6tmqiyw18h3r18o-ehur!+^o3%w$s7v9l=h12d','dev-secret')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'TRUE') == True
@@ -119,8 +117,18 @@ STATIC_URL = 'static/'
 REST_FRAMEWORK = {
   "DEFAULT_AUTHENTICATION_CLASSES": (
     "rest_framework_simplejwt.authentication.JWTAuthentication",
+    "merchants.authentication.ApiKeyAuthentication",
   ),
   "DEFAULT_PERMISSION_CLASSES": (
     "rest_framework.permissions.IsAuthenticated",
-  )
+  ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
