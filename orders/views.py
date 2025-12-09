@@ -5,8 +5,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from merchants.authentication import ApiKeyAuthentication
+# from verification import create_initial_verification
 from .serializers import OrderIngestSerializer
 from .models import Order
+from .risk import calculate_risk
+from .tasks import score_order_async
 
 class OrderIngestView(APIView):
     """
@@ -30,6 +33,16 @@ class OrderIngestView(APIView):
             amount=serializer.validated_data.get("amount") or 0,
             pincode=serializer.validated_data.get("pincode"),
         )
+
+        score_order_async.delay(order.id)
+
+        result = calculate_risk(order)  # or score_order(order)
+        order.risk_score = result["score"]
+        order.risk_band = result["band"]
+        order.risk_reasons = ", ".join(result["reasons"])
+        order.save()
+
+        # create_initial_verification(order)
 
         output = OrderIngestSerializer(order)
         return Response(output.data, status=status.HTTP_201_CREATED)
